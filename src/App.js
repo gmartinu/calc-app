@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   AppBar, 
   Toolbar, 
@@ -37,6 +37,15 @@ const useStyles = makeStyles(theme => ({
   },
   plusContainer:{
     height: 44 * 3 //Triplo do tamanho (44) da grid comum com o botão
+  },
+  paper:{
+    position: 'relative'
+  },
+  history:{
+    position: 'absolute',
+    color: "#FFF",
+    top: 2,
+    right: 6
   }
 }))
 
@@ -62,8 +71,10 @@ const Btn = withStyles({
 const App = () => {
   const classes = useStyles();
   const [hist, setHist] = useState("")
-  const [label, setLabel] = useState("")
-  const [value, setValue] = useState(0);
+  const [value, setValue] = useState("")
+
+  const inputRef = useRef();
+  const histRef = useRef();
 
   useEffect(() => {
     window.addEventListener('keydown', (event) => {
@@ -77,6 +88,8 @@ const App = () => {
         key === "+" || key === "Enter"
       ){
         handleClick(key)
+      }else if(key === "Escape"){
+        handleClear()
       }else return;
     });
   }, [])
@@ -93,7 +106,33 @@ const App = () => {
       case "8": 
       case "9": 
       case "0":
-        setLabel(_v => (`${_v}${text}`))
+        setValue(_v => (`${_v}${text}`))
+        break;
+      case "/":
+      case "*":
+      case "-":
+      case "+":
+        setHist(_v => {
+          if(_v.includes("=")){
+            return (`${inputRef.current.value} ${text}`)
+          }else return (`${_v} ${inputRef.current.value} ${text}`)
+        })
+        setValue(_v => (""))
+        break;
+      case "=":
+      case "Enter":
+        setHist(_v => {
+          try {
+            var calc = eval(String(`${_v} ${inputRef.current.value}`))  
+          } catch (error) {
+            if(error){
+              setValue(_v => ("Errrorr!.."))
+              return ("Errrorr!..")
+            }
+          }
+          setValue(_v => (calc))
+          return (`${_v} ${inputRef.current.value} =`)
+        })
         break;
       default:
         break;
@@ -101,9 +140,8 @@ const App = () => {
   }
 
   const handleClear = () => {
-    setLabel(_v => (''));
+    setValue(_v => (''));
     setHist(_v => (''));
-    setValue(_v => (0));
   }
 
   return (
@@ -115,7 +153,7 @@ const App = () => {
             edge="start" 
             className={classes.menuButton} 
             color="inherit" 
-            aria-label="menu"
+            aria-value="menu"
           >
             <GitHub />
           </IconButton>
@@ -131,8 +169,9 @@ const App = () => {
               <Box p={1}>
                 <Grid container spacing={1}>
                   <Grid item xs={12}>
-                    <LabelPaper>
-                      <TextField disabled value={label} fullWidth id="standard-basic" />
+                    <LabelPaper className={classes.paper}>
+                      <span ref={histRef} className={classes.history}>{hist}</span>
+                      <TextField inputRef={inputRef} disabled value={value} fullWidth id="standard-basic" />
                     </LabelPaper>
                   </Grid>
                   <Grid item xs={3}>
@@ -146,7 +185,7 @@ const App = () => {
                   <Grid item xs={3}>
                     <Btn 
                       variant="contained" 
-                      onClick={() => handleClick('/')}
+                      onClick={() => handleClick('/', value)}
                     >
                       <b>/</b>
                     </Btn>
@@ -154,7 +193,7 @@ const App = () => {
                   <Grid item xs={3}>
                     <Btn 
                       variant="contained" 
-                      onClick={() => handleClick('*')}
+                      onClick={() => handleClick('*', value)}
                     >
                       <b>x</b>
                     </Btn>
@@ -162,7 +201,7 @@ const App = () => {
                   <Grid item xs={3}>
                     <Btn 
                       variant="contained" 
-                      onClick={() => handleClick('-')}
+                      onClick={() => handleClick('-', value)}
                     >
                       <b>-</b>
                     </Btn>
@@ -246,7 +285,7 @@ const App = () => {
                   <Grid item xs={3} className={classes.plusContainer}>
                     <Btn 
                       variant="contained" 
-                      onClick={() => handleClick('+')} className={classes.plus}
+                      onClick={() => handleClick('+', value)} className={classes.plus}
                     >
                       <b>+</b>
                     </Btn>

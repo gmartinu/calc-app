@@ -16,6 +16,7 @@ export const theme = createMuiTheme({
                 padding: 8,
                 fontWeight: 100,
                 fontSize: '1.25rem',
+                textAlign: "right"
             },
             underline:{
                 "&:before":{
