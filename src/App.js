@@ -1,3 +1,4 @@
+/* eslint-disable no-eval */
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   AppBar, 
@@ -106,7 +107,13 @@ const App = () => {
       case "8": 
       case "9": 
       case "0":
-        setValue(_v => (`${_v}${text}`))
+        setValue(_v => {
+          if(_v.includes("Errrorr!")){
+            setHist(_v => (""))
+            return ((`${text}`))
+          }
+          return (`${_v}${text}`)
+        })
         break;
       case "/":
       case "*":
@@ -153,7 +160,6 @@ const App = () => {
             edge="start" 
             className={classes.menuButton} 
             color="inherit" 
-            aria-value="menu"
           >
             <GitHub />
           </IconButton>
@@ -164,7 +170,7 @@ const App = () => {
       </AppBar>
       <div className={classes.content}>
         <Grid container className={classes.content}>
-          <Grid item xs={3}>
+          <Grid item xs={12} sm={6} md={3}>
             <MainPaper>
               <Box p={1}>
                 <Grid container spacing={1}>
